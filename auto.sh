@@ -1,3 +1,3 @@
 cd ../../
 source devel/setup.bash
-cd src/ros-drone-transfer
+cd src/ros-edge-transfer
