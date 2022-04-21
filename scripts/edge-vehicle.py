@@ -63,6 +63,9 @@ class ServerR2E(Informer):
     def send_path(self, message):
         self.send(message, 'path')
 
+    def send_ctrl(self, message):
+        self.send(message, 'ctrl')
+
 #############################################
 
 def parse_path(message):
@@ -73,6 +76,13 @@ def relay_path(message):
     if ifm_r2e is not None:
         ifm_r2e.send_path(message)
 
+def parse_ctrl(message):
+    relay_ctrl(message)
+
+def relay_ctrl(message):
+    global ifm_r2e
+    if ifm_r2e is not None:
+        ifm_r2e.send_ctrl(message)
 class ServerE2C(Informer):
     def send_msg(self, message):
         self.send(message, 'msg')
@@ -91,6 +101,12 @@ class ServerE2C(Informer):
             self.recv('path', parse_path)
         except:
             print('recv path timeout !')
+
+    def ctrl_recv(self):
+        try:
+            self.recv('ctrl', parse_ctrl)
+        except:
+            print('recv ctrl timeout !')
 
 def start_r2e():
     global ifm_r2e
