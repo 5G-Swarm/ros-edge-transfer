@@ -51,5 +51,5 @@ qtcreator-*
 CATKIN_IGNORE
 *.log
 scripts/*.log
-
+scripts/logs/
 scripts/proto
