@@ -1,4 +1,6 @@
 debug_mode: False
+use_log: False
+robot_id: 0
 
 role_info:
     is_client: False
@@ -13,21 +15,21 @@ network_info:
 message_info:
     msg:
         is_tcp: True
-        port: 20001
+        port: 21000
     odm:
         is_tcp: True
-        port: 20002
+        port: 22000
     path:
         is_tcp: True
-        port: 20003
+        port: 23000
     cmd:
         is_tcp: True
-        port: 20004
+        port: 24000
     img:
         is_tcp: True
-        port: 20005
+        port: 25000
         width: 640
         height: 480
     ctrl:
         is_tcp: True
-        port: 20006
+        port: 26000

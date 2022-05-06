@@ -8,44 +8,45 @@ import threading
 
 from informer import Informer
 
-ifm_r2e =None
-ifm_e2c =None
+robot_num = 10
+ifm_r2e_dict = {}
+ifm_e2c_dict = {}
 
-def parse_img(message):
-    relay_img(message)
+def parse_img(message, robot_id):
+    relay_img(message, robot_id)
     # nparr = np.frombuffer(message, np.uint8)
     # img = cv2.imdecode(nparr,  cv2.IMREAD_COLOR)
     # cv2.imshow('Image',img)
     # cv2.waitKey(1)
 
-def relay_img(message):
-    global ifm_e2c
-    if ifm_e2c is not None:
-        ifm_e2c.send_img(message)
+def relay_img(message, robot_id):
+    global ifm_e2c_dict
+    if robot_id in ifm_e2c_dict.keys():
+        ifm_e2c_dict[robot_id].send_img(message)
 
-def parse_msg(message):
-    relay_msg(message)
+def parse_msg(message, robot_id):
+    relay_msg(message, robot_id)
 
-def relay_msg(message):
-    global ifm_e2c
-    if ifm_e2c is not None:
-        ifm_e2c.send_msg(message)
+def relay_msg(message, robot_id):
+    global ifm_e2c_dict
+    if robot_id in ifm_e2c_dict.keys():
+        ifm_e2c_dict[robot_id].send_msg(message)
 
-def parse_odm(message):
-    relay_odm(message)
+def parse_odm(message, robot_id):
+    relay_odm(message, robot_id)
 
-def relay_odm(message):
-    global ifm_e2c
-    if ifm_e2c is not None:
-        ifm_e2c.send_odm(message)
+def relay_odm(message, robot_id):
+    global ifm_e2c_dict
+    if robot_id in ifm_e2c_dict.keys():
+        ifm_e2c_dict[robot_id].send_odm(message)
 
-def parse_cmd(message):
-    relay_cmd(message)
+def parse_cmd(message, robot_id):
+    relay_cmd(message, robot_id)
 
-def relay_cmd(message):
-    global ifm_e2c
-    if ifm_e2c is not None:
-        ifm_e2c.send_cmd(message)
+def relay_cmd(message, robot_id):
+    global ifm_e2c_dict
+    if robot_id in ifm_e2c_dict.keys():
+        ifm_e2c_dict[robot_id].send_cmd(message)
 
 class ServerR2E(Informer):
     def img_recv(self):
@@ -68,21 +69,21 @@ class ServerR2E(Informer):
 
 #############################################
 
-def parse_path(message):
-    relay_path(message)
+def parse_path(message, robot_id):
+    relay_path(message, robot_id)
 
-def relay_path(message):
-    global ifm_r2e
-    if ifm_r2e is not None:
-        ifm_r2e.send_path(message)
+def relay_path(message, robot_id):
+    global ifm_r2e_dict
+    if robot_id in ifm_r2e_dict.keys():
+        ifm_r2e_dict[robot_id].send_path(message)
 
-def parse_ctrl(message):
-    relay_ctrl(message)
+def parse_ctrl(message, robot_id):
+    relay_ctrl(message, robot_id)
 
-def relay_ctrl(message):
-    global ifm_r2e
-    if ifm_r2e is not None:
-        ifm_r2e.send_ctrl(message)
+def relay_ctrl(message, robot_id):
+    global ifm_r2e_dict
+    if robot_id in  ifm_r2e_dict.keys():
+        ifm_r2e_dict[robot_id].send_ctrl(message)
 class ServerE2C(Informer):
     def send_msg(self, message):
         self.send(message, 'msg')
@@ -109,12 +110,15 @@ class ServerE2C(Informer):
             print('recv ctrl timeout !')
 
 def start_r2e():
-    global ifm_r2e
-    ifm_r2e = ServerR2E(config = 'config.yaml')
+    global ifm_r2e_dict
+    for i in range(1, robot_num+1):
+        ifm_r2e_dict[i] = ServerR2E(config = 'config.yaml', robot_id = i)
+    # ifm_r2e_dict[1] = ServerR2E(config = 'config.yaml', robot_id = 1)
 
 def start_e2c():
-    global ifm_e2c
-    ifm_e2c = ServerE2C(config = 'config_e2c.yaml')
+    global ifm_e2c_dict
+    for i in range(1, robot_num+1):
+        ifm_e2c_dict[i] = ServerE2C(config = 'config_e2c.yaml', robot_id = i)
 
 if __name__ == '__main__':
     start_r2e_thread = threading.Thread(
@@ -125,6 +129,5 @@ if __name__ == '__main__':
     )
     start_r2e_thread.start()
     start_e2c_thread.start()
-
     while True:
         sleep(0.01)
