@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   sensor_msgs
+  autoware_msgs
 )
 
 # add_message_files(
@@ -21,6 +22,7 @@ generate_messages(
   std_msgs
   sensor_msgs
   geometry_msgs
+  autoware_msgs
 )
 
 catkin_package(
