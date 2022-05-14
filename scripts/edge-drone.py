@@ -48,12 +48,19 @@ def parse_img(message, robot_id):
     global img_pub
     # print('get img!')
     # relay_img(message, robot_id)
-    nparr = np.frombuffer(message, np.uint8)
+    # ts = message[:19]
+    ts_secs = int(message[:10].decode())
+    ts_nsecs = int(message[10:19].decode())
+    # print(ts.decode(), ts_secs, ts_nsecs)
+    img_data = message[19:]
+    nparr = np.frombuffer(img_data, np.uint8)
     img = cv2.imdecode(nparr,  cv2.IMREAD_COLOR)
 
     ros_img = cv_bridge.cv2_to_imgmsg(img)
     ros_img.header = Header()
-    ros_img.header.stamp = rospy.Time.now()
+    # ros_img.header.stamp = rospy.Time.now()
+    ros_img.header.stamp.secs = ts_secs
+    ros_img.header.stamp.nsecs = ts_nsecs
     ros_img.header.frame_id = str(robot_id)
     # print(ros_img)
 
@@ -71,12 +78,24 @@ def parse_img(message, robot_id):
 
 def parse_state(message, robot_id):
     global state_pub_list
+
+    # ts = message[:19]
+    ts_secs = int(message[:10].decode())
+    ts_nsecs = int(message[10:19].decode())
+    message_data = message[19:]
+
     state = drone_state_msgs_pb2.DroneState()
-    state.ParseFromString(message)
+    state.ParseFromString(message_data)
     
     x, y = gps2xy(state.gps.lon_x, state.gps.lat_y)
 
     ros_state = DroneSyn()
+    ros_state.header = Header()
+    # ros_state.header.stamp = rospy.Time.now()
+    ros_state.header.stamp.secs = ts_secs
+    ros_state.header.stamp.nsecs = ts_nsecs
+    ros_state.header.frame_id = str(robot_id)
+
     # ros_state.gps[0] = state.gps.lon_x
     ros_state.gps[0] = x# - 33425780
     # ros_state.gps[1] = state.gps.lat_y
