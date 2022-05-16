@@ -14,7 +14,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from autoware_msgs.msg import DroneSyn
 
-from proto.python_out import drone_state_msgs_pb2
+from proto.python_out import drone_state_msgs_pb2, drone_cmd_msgs_pb2
 
 cv_bridge = CvBridge()
 
@@ -68,8 +68,11 @@ def parse_img(message, robot_id):
         img_pub.publish(ros_img)
     except:
         pass
-    # cv2.imshow('Image',img)
-    # cv2.waitKey(2)
+
+    send_cmd(4)
+    send_cmd(3)
+    cv2.imshow('Image',img)
+    cv2.waitKey(2)
 
 # def relay_img(message, robot_id):
 #     global ifm_e2c_dict
@@ -137,8 +140,8 @@ class ServerR2E(Informer):
     def state_recv(self):
         self.recv('state', parse_state)
 
-    def cmd_recv(self):
-        self.recv('cmd', parse_cmd)
+    def send_cmd(self, message):
+        self.send(message, 'cmd')
 
 #############################################
 
@@ -178,6 +181,18 @@ def start_r2e():
 #     for i in range(1, robot_num+1):
 #         ifm_e2c_dict[i] = ServerE2C(config = 'config_e2c.yaml', robot_id = i)
 
+def send_cmd(robot_id):
+    cmd = drone_cmd_msgs_pb2.DroneCmd()
+    cmd.vx = 1.0
+    cmd.vy = 1.0
+    cmd.vz = 1.0
+    cmd.wz = 1.0
+    cmd.flag = drone_cmd_msgs_pb2.CmdType.Value("TAKE_OFF")
+    # print(drone_cmd_msgs_pb2.CmdType.Name(cmd.flag))
+    cmd_data = cmd.SerializeToString()
+    ifm_r2e_dict[robot_id].send_cmd(cmd_data)
+
+
 if __name__ == '__main__':
     rospy.init_node('drone_edge_transfer', anonymous=True)
     img_pub = rospy.Publisher('/drone_image', Image, queue_size=0)
@@ -195,3 +210,6 @@ if __name__ == '__main__':
     rate = rospy.Rate(1000)
     while not rospy.is_shutdown():
         rate.sleep()
+    # while True:
+    #     send_cmd(4)
+    #     sleep(0.5)
