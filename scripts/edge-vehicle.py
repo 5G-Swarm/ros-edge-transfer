@@ -12,6 +12,16 @@ robot_num = 10
 ifm_r2e_dict = {}
 ifm_e2c_dict = {}
 
+def parse_recg(message, robot_id):
+    # print('parse_recg', len(message), robot_id)
+    relay_recg(message, robot_id)
+
+def relay_recg(message, robot_id):
+    global ifm_e2c_dict
+    if robot_id in ifm_e2c_dict.keys():
+        # print('send recg to', robot_id)
+        ifm_e2c_dict[robot_id].send_recg(message)
+
 def parse_img(message, robot_id):
     relay_img(message, robot_id)
     # nparr = np.frombuffer(message, np.uint8)
@@ -61,6 +71,9 @@ class ServerR2E(Informer):
     def cmd_recv(self):
         self.recv('cmd', parse_cmd)
 
+    def recg_recv(self):
+        self.recv('recg', parse_recg)
+
     def send_path(self, message):
         self.send(message, 'path')
 
@@ -96,6 +109,9 @@ class ServerE2C(Informer):
 
     def send_img(self, message):
         self.send(message, 'img')
+
+    def send_recg(self, message):
+        self.send(message, 'recg')
     
     def path_recv(self):
         try:

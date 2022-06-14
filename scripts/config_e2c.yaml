@@ -33,3 +33,6 @@ message_info:
     ctrl:
         is_tcp: True
         port: 26000
+    recg:
+        is_tcp: True
+        port: 27000
